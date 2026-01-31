@@ -88,7 +88,8 @@ def get_config():
         api_token = "your-api-token"
         
         [google]
-        apps_script_url = "https://script.google.com/macros/s/.../exec"
+        apps_script_url_brand = "https://script.google.com/macros/s/AKfycbyM6mfPdYDXgwIKkjAv9CdZrenHLetP1grs_iWehzcAFEjz8zN_6kMjM4WnVCFAHvbM/exec"
+        apps_script_url_meat = "https://script.google.com/macros/s/AKfycbwgqsJMK-hjBounu_cKNu3fNqTunlAJwt3VqaLGXkSdj-zXaOee8Z1BVGfIXShmXXggdg/exec"
         sheet_name = "지시사항분석"
         ```
         """)
