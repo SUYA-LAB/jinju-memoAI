@@ -138,9 +138,19 @@ def save_to_sheets(team, directive, analysis, config):
         'analysis': analysis
     }
     
+     # 팀별 URL 선택
+    if team == '브랜드':
+        url = config['apps_script_url_brand']
+    elif team == '육가공':
+        url = config['apps_script_url_meat']
+    elif team == '사업관리':
+        url = config['apps_script_url_business']
+    else:
+        url = config.get('apps_script_url', '')  # 기본값
+
     try:
         response = requests.post(
-            config['apps_script_url'],
+            url,
             json=data,
             timeout=10
         )
