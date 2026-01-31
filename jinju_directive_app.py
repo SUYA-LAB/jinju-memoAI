@@ -148,7 +148,7 @@ def save_to_sheets(team, directive, analysis, config):
     elif team == '사업관리':
         url = config['apps_script_url_business']
     else:
-        url = config.get('apps_script_url', '')  # 기본값
+        return False
 
     try:
         response = requests.post(
