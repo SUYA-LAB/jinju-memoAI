@@ -74,8 +74,7 @@ def get_config():
         return {
             'cf_account_id': st.secrets['cloudflare']['account_id'],
             'cf_api_token': st.secrets['cloudflare']['api_token'],
-            'apps_script_url_brand': st.secrets['google']['apps_script_url_brand'],
-            'apps_script_url_meat': st.secrets['google']['apps_script_url_meat'],
+            'apps_script_url': st.secrets['google']['apps_script_url'],
             'sheet_name': st.secrets['google'].get('sheet_name', '지시사항분석')
         }
     except Exception as e:
@@ -88,8 +87,7 @@ def get_config():
         api_token = "your-api-token"
         
         [google]
-        apps_script_url_brand = "https://script.google.com/macros/s/AKfycbyM6mfPdYDXgwIKkjAv9CdZrenHLetP1grs_iWehzcAFEjz8zN_6kMjM4WnVCFAHvbM/exec"
-        apps_script_url_meat = "https://script.google.com/macros/s/AKfycbwgqsJMK-hjBounu_cKNu3fNqTunlAJwt3VqaLGXkSdj-zXaOee8Z1BVGfIXShmXXggdg/exec"
+        apps_script_url = "https://script.google.com/macros/s/.../exec"
         sheet_name = "지시사항분석"
         ```
         """)
@@ -140,19 +138,9 @@ def save_to_sheets(team, directive, analysis, config):
         'analysis': analysis
     }
     
-     # 팀별 URL 선택
-    if team == '브랜드':
-        url = config['apps_script_url_brand']
-    elif team == '육가공':
-        url = config['apps_script_url_meat']
-    elif team == '사업관리':
-        url = config['apps_script_url_business']
-    else:
-        return False
-
     try:
         response = requests.post(
-            url,
+            config['apps_script_url'],
             json=data,
             timeout=10
         )
@@ -163,30 +151,18 @@ def save_to_sheets(team, directive, analysis, config):
 
 # Google Sheets에서 불러오기
 def load_from_sheets(config):
-    """Google Sheets에서 히스토리 불러오기 (브랜드 + 육가공 합치기)"""
-    all_data = []
-    
-    # 브랜드 시트에서 불러오기
+    """Google Sheets에서 히스토리 불러오기"""
     try:
-        url_brand = f"{config['apps_script_url_brand']}?sheetName={config['sheet_name']}"
-        response_brand = requests.get(url_brand, timeout=10)
-        data_brand = response_brand.json()
-        if data_brand.get('success') and data_brand.get('data'):
-            all_data.extend(data_brand['data'])
+        url = f"{config['apps_script_url']}?sheetName={config['sheet_name']}"
+        response = requests.get(url, timeout=10)
+        data = response.json()
+        
+        if data.get('success') and data.get('data'):
+            return data['data']
+        return []
     except Exception as e:
-        st.warning(f"브랜드 히스토리 로드 실패: {str(e)}")
-    
-    # 육가공 시트에서 불러오기
-    try:
-        url_meat = f"{config['apps_script_url_meat']}?sheetName={config['sheet_name']}"
-        response_meat = requests.get(url_meat, timeout=10)
-        data_meat = response_meat.json()
-        if data_meat.get('success') and data_meat.get('data'):
-            all_data.extend(data_meat['data'])
-    except Exception as e:
-        st.warning(f"육가공 히스토리 로드 실패: {str(e)}")
-    
-    return all_data
+        st.error(f"히스토리 로드 실패: {str(e)}")
+        return []
 
 # 팀 뱃지 생성
 def get_team_badge(team):
@@ -267,7 +243,7 @@ def main():
         with col1:
             team = st.selectbox(
                 "팀 구분",
-                ["", "브랜드", "육가공", "사업관리"],
+                ["", "브랜드"],
                 index=0
             )
         
@@ -333,7 +309,7 @@ def main():
         with filter_col1:
             filter_team = st.radio(
                 "팀 필터",
-                ["전체", "브랜드", "육가공", "사업관리"],
+                ["전체", "브랜드"],
                 horizontal=True
             )
         
